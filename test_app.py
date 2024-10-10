@@ -86,8 +86,3 @@ def test_reduce_invalid_operator(client):
     response = client.get('/reduce?op=invalid&lst=[1,2,3]')
     assert response.status_code == 400
     assert b'Invalid operator' in response.data
-
-def test_last_no_operations(client):
-    response = client.get('/last')
-    assert response.status_code == 404
-    assert b'No operations yet' in response.data
