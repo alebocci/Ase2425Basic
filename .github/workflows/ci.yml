@@ -26,11 +26,11 @@ jobs:
         
       - name: Build calc image
         run: |
-          cd calc
+          cd src/calc
           docker build -f Dockerfile_test -t calctest .
       - name: Run calc image
         run: |
-          cd calc
+          cd src/calc
           docker run --rm --name calct -d -p 5000:5000 calctest
       - name: Run tests
         run: |
@@ -42,11 +42,11 @@ jobs:
       
       - name: Build string image
         run: |
-          cd string
+          cd src/string
           docker build -f Dockerfile_test -t strtest .
       - name: Run string image
         run: |
-          cd string
+          cd src/string
           docker run --rm --name strt -d -p 5000:5000 strtest
       - name: Run tests
         run: |
@@ -58,6 +58,7 @@ jobs:
       
       - name: Launch app
         run: |
+          cd src/
           docker compose up --build -d
       - name: Run tests
         run: |
