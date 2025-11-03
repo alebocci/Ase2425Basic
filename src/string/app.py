@@ -20,6 +20,8 @@ def concat():
 def upper():
     # default to empty string instead of integer 0
     a = request.args.get('a', '', type=str)
+    if a is None:
+        return make_response('Invalid input\n', 400)
     res = a.upper()
     save_last("upper","("+a+")",res)
     return make_response(jsonify(s=res), 200)
@@ -28,6 +30,8 @@ def upper():
 def lower():
     # default to empty string instead of integer 0
     a = request.args.get('a', '', type=str)
+    if a is None:
+        return make_response('Invalid input\n', 400)
     res = a.lower()
     save_last("lower","("+a+")",res)
     return make_response(jsonify(s=res), 200)
