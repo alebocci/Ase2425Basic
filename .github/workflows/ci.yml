@@ -66,5 +66,6 @@ jobs:
           newman run integration.postman_collection.json
       - name: Stop app
         run: |
+          cd src/
           docker compose down
       
