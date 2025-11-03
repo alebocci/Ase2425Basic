@@ -38,7 +38,6 @@ def math(op):
         else:
             a = request.args.get('a')
             b = request.args.get('b')
-            # require both operands for binary operations
             if a is None or b is None:
                 return make_response('Invalid input\n', 400)
             URL = CALC_URL + f'/{op}?a={a}&b={b}'

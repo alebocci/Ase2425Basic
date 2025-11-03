@@ -8,9 +8,8 @@ app = Flask(__name__)
 def concat():
     a = request.args.get('a', type=str)
     b = request.args.get('b', type=str)
-    # accept empty strings as valid values (None means missing)
     if a is not None and b is not None:
-        res = a+b
+        res = b + a
         save_last("concat",(a,b),res)
         return make_response(jsonify(s=res), 200)
     else:
@@ -18,7 +17,6 @@ def concat():
 
 @app.route('/upper')
 def upper():
-    # default to empty string instead of integer 0
     a = request.args.get('a', '', type=str)
     if not a:
         return make_response('Invalid input\n', 400)
@@ -28,7 +26,6 @@ def upper():
 
 @app.route('/lower')
 def lower():
-    # default to empty string instead of integer 0
     a = request.args.get('a', '', type=str)
     if not a:
         return make_response('Invalid input\n', 400)
