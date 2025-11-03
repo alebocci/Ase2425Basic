@@ -61,18 +61,18 @@ def string(op):
         return json_response
     
     a = request.args.get('a', type=str)
-    
-    
+    if not a:
+        return make_response('Invalid input\n', 400)
+
     if op == 'lower':
         json_response = string_request(STRING_URL + f'/{op}?a={a}')
-        time.sleep(1)
     elif op == 'crash':
         json_response = string_request(STRING_URL + f'/crash')
     elif op == 'upper':
         json_response = string_request(STRING_URL + f'/{op}?a={a}')
     else:
         b = request.args.get('b', type=str)
-        if b is None:
+        if not b:
             return make_response('Invalid input\n', 400)
         json_response = string_request(STRING_URL + f'/{op}?a={a}&b={b}')
     return json_response
