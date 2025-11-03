@@ -20,7 +20,7 @@ def concat():
 def upper():
     # default to empty string instead of integer 0
     a = request.args.get('a', '', type=str)
-    if a is None:
+    if not a:
         return make_response('Invalid input\n', 400)
     res = a.upper()
     save_last("upper","("+a+")",res)
@@ -30,7 +30,7 @@ def upper():
 def lower():
     # default to empty string instead of integer 0
     a = request.args.get('a', '', type=str)
-    if a is None:
+    if not a:
         return make_response('Invalid input\n', 400)
     res = a.lower()
     save_last("lower","("+a+")",res)
