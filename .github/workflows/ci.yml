@@ -37,8 +37,9 @@ jobs:
           cd tests
           newman run calc_ut.postman_collection.json
       - name: Stop calc image
+        if: always()
         run: |
-          docker stop calct
+          docker stop calct || true
       
       - name: Build string image
         run: |
@@ -53,8 +54,9 @@ jobs:
           cd tests
           newman run string_ut.postman_collection.json
       - name: Stop string image
+        if: always()
         run: |
-          docker stop strt
+          docker stop strt || true
       
       - name: Launch app
         run: |
@@ -65,7 +67,8 @@ jobs:
           cd tests
           newman run integration.postman_collection.json
       - name: Stop app
+        if: always()
         run: |
           cd src/
-          docker compose down
+          docker compose down || true
       
