@@ -1,0 +1,183 @@
+name: CI Workflow
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build_tests:
+    runs-on: ubuntu-latest
+    steps:
+      -  name: Checkout code
+         uses: actions/checkout@v4
+          
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '16'
+
+      - name: Install Newman
+        run: |
+          name: CI Workflow
+
+          on:
+            push:
+              branches:
+                - main
+
+          jobs:
+            calc_tests:
+              runs-on: ubuntu-latest
+              steps:
+                - name: Checkout code
+                  uses: actions/checkout@v4
+
+                - name: Set up Node
+                  uses: actions/setup-node@v4
+                  with:
+                    node-version: '16'
+
+                - name: Install Newman
+                  run: |
+                    npm install -g newman
+
+                - name: Set up Docker Buildx
+                  uses: docker/setup-buildx-action@v3
+
+                - name: Build calc image
+                  run: |
+                    cd src/calc
+                    docker build -f Dockerfile_test -t calctest .
+                - name: Run calc image
+                  run: |
+                    cd src/calc
+                    docker run --rm --name calct -d -p 5000:5000 calctest
+                - name: Run tests
+                  run: |
+                    cd tests
+                    newman run calc_ut.postman_collection.json
+                - name: Stop calc image
+                  if: always()
+                  run: |
+                    docker stop calct || true
+
+            string_tests:
+              runs-on: ubuntu-latest
+              steps:
+                - name: Checkout code
+                  uses: actions/checkout@v4
+
+                - name: Set up Node
+                  uses: actions/setup-node@v4
+                  with:
+                    node-version: '16'
+
+                - name: Install Newman
+                  run: |
+                    npm install -g newman
+
+                - name: Set up Docker Buildx
+                  uses: docker/setup-buildx-action@v3
+
+                - name: Build string image
+                  run: |
+                    cd src/string
+                    docker build -f Dockerfile_test -t strtest .
+                - name: Run string image
+                  run: |
+                    cd src/string
+                    docker run --rm --name strt -d -p 5000:5000 strtest
+                - name: Run tests
+                  run: |
+                    cd tests
+                    newman run string_ut.postman_collection.json
+                - name: Stop string image
+                  if: always()
+                  run: |
+                    docker stop strt || true
+
+            integration:
+              needs: [calc_tests, string_tests]
+              runs-on: ubuntu-latest
+              steps:
+                - name: Checkout code
+                  uses: actions/checkout@v4
+
+                - name: Set up Node
+                  uses: actions/setup-node@v4
+                  with:
+                    node-version: '16'
+
+                - name: Install Newman
+                  run: |
+                    npm install -g newman
+
+                - name: Set up Docker Buildx
+                  uses: docker/setup-buildx-action@v3
+
+                - name: Launch app
+                  run: |
+                    cd src/
+                    docker compose up --build -d
+                - name: Run tests
+                  run: |
+                    cd tests
+                    newman run integration.postman_collection.json
+                - name: Stop app
+                  if: always()
+                  run: |
+                    cd src/
+                    docker compose down || true
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        
+      - name: Build calc image
+        run: |
+          cd src/calc
+          docker build -f Dockerfile_test -t calctest .
+      - name: Run calc image
+        run: |
+          cd src/calc
+          docker run --rm --name calct -d -p 5000:5000 calctest
+      - name: Run tests
+        run: |
+          cd tests
+          newman run calc_ut.postman_collection.json
+      - name: Stop calc image
+        if: always()
+        run: |
+          docker stop calct || true
+      
+      - name: Build string image
+        run: |
+          cd src/string
+          docker build -f Dockerfile_test -t strtest .
+      - name: Run string image
+        run: |
+          cd src/string
+          docker run --rm --name strt -d -p 5000:5000 strtest
+      - name: Run tests
+        run: |
+          cd tests
+          newman run string_ut.postman_collection.json
+      - name: Stop string image
+        if: always()
+        run: |
+          docker stop strt || true
+      
+      - name: Launch app
+        run: |
+          cd src/
+          docker compose up --build -d
+      - name: Run tests
+        run: |
+          cd tests
+          newman run integration.postman_collection.json
+      - name: Stop app
+        if: always()
+        run: |
+          cd src/
+          docker compose down || true
+      
