@@ -1,5 +1,8 @@
+
 from flask import Flask, request, make_response, jsonify
-import random, time, os, threading
+import random, time, os, threading, requests
+import ast
+
 
 app = Flask(__name__)
 
@@ -8,8 +11,8 @@ def add():
     a = request.args.get('a', type=float)
     b = request.args.get('b', type=float)
     if a is not None and b is not None:
-        save_last("add",(a,b),a+b)
-        return make_response(jsonify(s=a+b), 200) #HTTP 200 OK
+        save_last("add", (a, b), a + b)
+        return make_response(jsonify(s=a + b), 200) #HTTP 200 OK
     else:
         return make_response('Invalid input\n', 400) #HTTP 400 BAD REQUEST
 
@@ -18,18 +21,18 @@ def sub():
     a = request.args.get('a', type=float)
     b = request.args.get('b', type=float)
     if a is not None and b is not None:
-        save_last("sub",(a,b),a-b)
-        return make_response(jsonify(s=a-b), 200)
+        save_last("sub", (a, b), a - b)
+        return make_response(jsonify(s=a - b), 200)
     else:
         return make_response('Invalid input\n', 400)
-        
+
 @app.route('/mul')
 def mul():
     a = request.args.get('a', type=float)
     b = request.args.get('b', type=float)
     if a is not None and b is not None:
-        save_last("mul",(a,b),a*b)
-        return make_response(jsonify(s=a*b), 200)
+        save_last("mul", (a, b), a * b)
+        return make_response(jsonify(s=a * b), 200)
     else:
         return make_response('Invalid input\n', 400)
 
@@ -40,8 +43,8 @@ def div():
     if a is not None and b is not None:
         if b == 0:
             return make_response('Division by zero\n', 400)
-        save_last("div",(a,b),a/b)
-        return make_response(jsonify(s=a/b), 200)
+        save_last("div", (a, b), a / b)
+        return make_response(jsonify(s=a / b), 200)
     else:
         return make_response('Invalid input\n', 400)
 
@@ -52,8 +55,8 @@ def mod():
     if a is not None and b is not None:
         if b == 0:
             return make_response('Division by zero\n', 400)
-        save_last("mod",(a,b),a%b)
-        return make_response(jsonify(s=a%b), 200)
+        save_last("mod", (a, b), a % b)
+        return make_response(jsonify(s=a % b), 200)
     else:
         return make_response('Invalid input\n', 400)
 
@@ -65,46 +68,25 @@ def rand():
         if a > b:
             return make_response('Invalid input\n', 400)
         res = random.randint(a, b)
-        save_last("random",(a,b),res)
+        save_last("random", (a, b), res)
         return make_response(jsonify(s=res), 200)
     else:
         return make_response('Invalid input\n', 400)
-
-@app.route('/concat')
-def concat():
-    a = request.args.get('a', type=str)
-    b = request.args.get('b', type=str)
-    if a is not None and b is not None:
-        res = a+b
-        save_last("concat",(a,b),res)
-        return make_response(jsonify(s=res), 200)
-    else:
-        return make_response('Invalid input\n', 400)
-
-@app.route('/upper')
-def upper():
-    a = request.args.get('a', 0, type=str)
-    res = a.upper()
-    save_last("upper","("+a+")",res)
-    return make_response(jsonify(s=res), 200)
-
-@app.route('/lower')
-def lower():
-    a = request.args.get('a', 0, type=str)
-    res = a.lower()
-    save_last("lower","("+a+")",res)
-    return make_response(jsonify(s=res), 200)
-
 
 @app.route('/reduce')
 def reduce():
     op = request.args.get('op', type=str)
     lst = request.args.get('lst', type=str)
     if op and lst:
-        lst = eval(lst)
+        try:
+            lst = ast.literal_eval(lst)
+        except Exception:
+            return make_response('Invalid input\n', 400)
+        if not isinstance(lst, list):
+            return make_response('Invalid input\n', 400)
         if op == 'add':
             res = sum(lst)
-            response =  make_response(jsonify(s=res), 200)
+            response = make_response(jsonify(s=res), 200)
         elif op == 'sub':
             res = lst[0] - sum(lst[1:])
             response = make_response(jsonify(s=res), 200)
@@ -122,10 +104,10 @@ def reduce():
             response = make_response(jsonify(s=res), 200)
         else:
             return make_response(f'Invalid operator: {op}', 400)
-        save_last("reduce",(op,lst),res)
+        save_last("reduce", (op, lst), res)
         return response
     else:
-        return make_response('Invalid operator\n', 400)
+        return make_response('Invalid input\n', 400)
 
 @app.route('/crash')
 def crash():
@@ -137,18 +119,15 @@ def crash():
     ret = str(request.host) + " crashed"
     return make_response(jsonify(s=ret), 200)
 
-@app.route('/last')
-def last():
-    try:
-        with open('last.txt', 'r') as f:
-            return make_response(jsonify(s=f.read()), 200)
-    except FileNotFoundError:
-        return make_response('No operations yet\n', 404)
-
-
+mock_save_last = None
 def save_last(op,args,res):
-    with open('last.txt', 'w') as f:
-            f.write(f'{op}{args}={res}')
+    if mock_save_last: #if mock_save_last is not None
+        mock_save_last(op,args,res)
+    else:
+        timestamp = time.time()
+        payload = {'timestamp': timestamp, 'op': op, 'args': args, 'res': res}
+        requests.post('http://db-manager:5000/notify', json=payload)
+        
 
 if __name__ == '__main__':
     app.run(debug=True)

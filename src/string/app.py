@@ -1,0 +1,74 @@
+from flask import Flask, request, make_response, jsonify
+import time, os, threading, requests
+
+app = Flask(__name__)
+
+
+@app.route('/concat')
+def concat():
+    a = request.args.get('a', type=str)
+    b = request.args.get('b', type=str)
+    # accept empty strings as valid values (None means missing)
+    if a is not None and b is not None:
+        res = a+b
+        save_last("concat",(a,b),res)
+        return make_response(jsonify(s=res), 200)
+    else:
+        return make_response('Invalid input\n', 400)
+
+@app.route('/upper')
+def upper():
+    # default to empty string instead of integer 0
+    a = request.args.get('a', '', type=str)
+    res = a.upper()
+    save_last("upper","("+a+")",res)
+    return make_response(jsonify(s=res), 200)
+
+@app.route('/lower')
+def lower():
+    # default to empty string instead of integer 0
+    a = request.args.get('a', '', type=str)
+    res = a.lower()
+    save_last("lower","("+a+")",res)
+    return make_response(jsonify(s=res), 200)
+
+@app.route('/reduce')
+def reduce():
+    op = request.args.get('op', type=str)
+    lst = request.args.get('lst', type=str)
+    if op and lst:
+        try:
+            lst = eval(lst)
+        except Exception:
+            return make_response('Invalid input\n', 400)
+        if not isinstance(lst, list):
+            return make_response('Invalid input\n', 400)
+        if op == 'concat':
+            res = ""
+            for i in lst:
+                res += str(i)
+            save_last("reduce",(op,lst),res)
+            return  make_response(jsonify(s=res), 200)
+    return make_response('Invalid input\n', 400)
+
+@app.route('/crash')
+def crash():
+    def close():
+        time.sleep(1)
+        os._exit(0)
+    thread = threading.Thread(target=close)
+    thread.start()
+    ret = str(request.host) + " crashed"
+    return make_response(jsonify(s=ret), 200)
+
+mock_save_last = None
+def save_last(op,args,res):
+    if mock_save_last:
+        mock_save_last(op,args,res)
+    else:
+        timestamp = time.time()
+        payload = {'timestamp': timestamp, 'op': op, 'args': args, 'res': res}
+        requests.post('http://db-manager:5000/notify', json=payload)
+
+if __name__ == '__main__':
+    app.run(debug=True)

@@ -1,10 +1,12 @@
 openapi: 3.0.0
 info:
-  title: Simple Arithmetic and String Operations API
-  version: 1.0.0
-  description: This API performs various arithmetic operations and string manipulations.
+  title: Calc Service API
+  version: "1.0"
+  description: API for mathematical operations.
+
 servers:
   - url: http://localhost:5000
+
 paths:
   /add:
     get:
@@ -15,16 +17,14 @@ paths:
           required: true
           schema:
             type: number
-            format: float
         - name: b
           in: query
           required: true
           schema:
             type: number
-            format: float
       responses:
         '200':
-          description: Successful response with sum
+          description: Sum result
           content:
             application/json:
               schema:
@@ -32,10 +32,9 @@ paths:
                 properties:
                   s:
                     type: number
-                    format: float
         '400':
           description: Invalid input
-          
+
   /sub:
     get:
       summary: Subtract two numbers
@@ -45,16 +44,14 @@ paths:
           required: true
           schema:
             type: number
-            format: float
         - name: b
           in: query
           required: true
           schema:
             type: number
-            format: float
       responses:
         '200':
-          description: Successful response with difference
+          description: Subtraction result
           content:
             application/json:
               schema:
@@ -62,7 +59,6 @@ paths:
                 properties:
                   s:
                     type: number
-                    format: float
         '400':
           description: Invalid input
 
@@ -75,16 +71,14 @@ paths:
           required: true
           schema:
             type: number
-            format: float
         - name: b
           in: query
           required: true
           schema:
             type: number
-            format: float
       responses:
         '200':
-          description: Successful response with product
+          description: Multiplication result
           content:
             application/json:
               schema:
@@ -92,7 +86,6 @@ paths:
                 properties:
                   s:
                     type: number
-                    format: float
         '400':
           description: Invalid input
 
@@ -105,16 +98,14 @@ paths:
           required: true
           schema:
             type: number
-            format: float
         - name: b
           in: query
           required: true
           schema:
             type: number
-            format: float
       responses:
         '200':
-          description: Successful response with quotient
+          description: Division result
           content:
             application/json:
               schema:
@@ -122,9 +113,8 @@ paths:
                 properties:
                   s:
                     type: number
-                    format: float
         '400':
-          description: Division by zero or invalid input
+          description: Invalid input or division by zero
 
   /mod:
     get:
@@ -135,16 +125,14 @@ paths:
           required: true
           schema:
             type: number
-            format: float
         - name: b
           in: query
           required: true
           schema:
             type: number
-            format: float
       responses:
         '200':
-          description: Successful response with result
+          description: Modulo result
           content:
             application/json:
               schema:
@@ -152,13 +140,12 @@ paths:
                 properties:
                   s:
                     type: number
-                    format: float
         '400':
-          description: Division by zero or invalid input
+          description: Invalid input or division by zero
 
   /random:
     get:
-      summary: Generate a random number between two integers
+      summary: Random integer between a and b (inclusive)
       parameters:
         - name: a
           in: query
@@ -172,7 +159,7 @@ paths:
             type: integer
       responses:
         '200':
-          description: Successful response with random number
+          description: Random integer result
           content:
             application/json:
               schema:
@@ -183,107 +170,41 @@ paths:
         '400':
           description: Invalid input
 
-  /concat:
-    get:
-      summary: Concatenate two strings
-      parameters:
-        - name: a
-          in: query
-          required: true
-          schema:
-            type: string
-        - name: b
-          in: query
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Successful response with concatenated string
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  s:
-                    type: string
-        '400':
-          description: Invalid input
-
-  /upper:
-    get:
-      summary: Convert a string to uppercase
-      parameters:
-        - name: a
-          in: query
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Successful response with uppercase string
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  s:
-                    type: string
-
-  /lower:
-    get:
-      summary: Convert a string to lowercase
-      parameters:
-        - name: a
-          in: query
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Successful response with lowercase string
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  s:
-                    type: string
-
   /reduce:
     get:
-      summary: Perform reduction operation on a list of numbers or strings
+      summary: Reduce a list of numbers with an operation
       parameters:
         - name: op
           in: query
           required: true
           schema:
             type: string
-            enum: [add, sub, mul, div, concat]
+            enum: [add, sub, mul, div]
         - name: lst
           in: query
           required: true
           schema:
             type: string
+            description: Python list as string, e.g. [1,2,3]
       responses:
         '200':
-          description: Successful response with result of the operation
+          description: Reduction result
           content:
             application/json:
               schema:
                 type: object
                 properties:
                   s:
-                    type: string
+                    type: number
         '400':
           description: Invalid operator or input
 
   /crash:
     get:
-      summary: Crash the server
+      summary: Crash the service (for testing)
       responses:
         '200':
-          description: Server crashed successfully
+          description: Crash message
           content:
             application/json:
               schema:
@@ -291,19 +212,3 @@ paths:
                 properties:
                   s:
                     type: string
-
-  /last:
-    get:
-      summary: Retrieve the last operation result
-      responses:
-        '200':
-          description: Successful response with last operation
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  s:
-                    type: string
-        '404':
-          description: No operations yet
