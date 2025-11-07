@@ -11,7 +11,7 @@ def add():
     a = request.args.get('a', type=float)
     b = request.args.get('b', type=float)
     if a is not None and b is not None:
-        res = a + b + 1
+        res = a + b
         save_last("add", (a, b), res)
         return make_response(jsonify(s=res), 200) #HTTP 200 OK
     else:
