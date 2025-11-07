@@ -30,7 +30,6 @@ jobs:
 
       - name: Run calc container
         run: |
-          cd src/calc
           docker run --rm --name calct -d -p 5000:5000 calctest
 
       - name: Run calc tests
